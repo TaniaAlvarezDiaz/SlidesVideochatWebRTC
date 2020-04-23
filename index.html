@@ -1,0 +1,254 @@
+<!doctype html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+		<meta name="author" content="Tania Álvarez Díaz">
+
+		<title>Dibujo colaborativo con WebSockets</title>
+
+		<link rel="stylesheet" href="css/reset.css">
+		<link rel="stylesheet" href="css/reveal.css">
+		<link rel="stylesheet" href="css/theme/solarized.css">
+
+		<!-- Theme used for syntax highlighting of code -->
+		<link rel="stylesheet" href="lib/css/monokai.css">
+
+		<!-- Custom theme-->
+		<link rel="stylesheet" href="css/custom.css">
+
+		<!-- Printing and PDF exports -->
+		<script>
+			var link = document.createElement( 'link' );
+			link.rel = 'stylesheet';
+			link.type = 'text/css';
+			link.href = window.location.search.match( /print-pdf/gi ) ? 'css/print/pdf.css' : 'css/print/paper.css';
+			document.getElementsByTagName( 'head' )[0].appendChild( link );
+		</script>
+	</head>
+	<body>
+		<div class="reveal">
+			<div class="slides">
+				<section class="center">
+					<h1>Dibujo colaborativo con WebSockets</h1>
+					<p>Tania Álvarez Díaz</p>
+					<p><a><href="mailto:uo244856@uniovi.es">UO244856@uniovi.es</a></p>
+					<p><small>Difusión de contenidos multimedia vía web</small></p>
+				</section>
+				<section>
+					<h2>Índice</h2>
+					<ul>
+						<li>Introducción.</li>
+						<li>Desarrollo.
+							<ul>
+								<li>Desarrollo del servidor.</li>
+								<li>Desarrollo del cliente.</li>
+							</ul>
+						</li>
+						<li>Ejecución.</li>
+						<li>Despliegue.</li>
+					</ul>
+				</section>
+				<section>
+					<h2>Introducción</h2>
+					<p>
+						El proyecto consiste en una aplicación de dibujo colaborativo con WebSockets.</br>
+						Esta aplicación consta de:
+						<ul>
+							<li><b>Servidor</b>: encargado de gestionar las conexiones de los distintos usuarios y los dibujos que estos van añadiendo al canvas.</li>
+							<li><b>Cliente</b>: permite a los usuarios conectarse al servidor, recibir los contenidos que hay dibujados hasta ese momento en el canvas y colaborar en el dibujo.</li>
+						</ul>
+					</p>
+				</section>
+				<section>
+					<section class="smaller">
+						<h2>Desarrollo</h2>
+						<ul>
+							<li><a href="https://code.visualstudio.com/">Visual Studio Code</a>: para desarrollar el cliente y el servidor.</li>
+							<li><a href="https://nodejs.org/es/">Node.js</a>: para instalar y ejecutar el servidor.</li>
+						</ul>
+						<img id="serverCreation" src="images/serverCreation.JPG" alt="Creación del servidor"/>
+					</section>
+					<section class="smaller">
+						<h2>Desarrollo del servidor</h2>
+						<ul>
+							<li><b>Server.js</b>: fichero donde se encuentra la implementación del servidor.</li>
+							<li><b>Función "incoming"</b>: se ejecuta cuando el servidor recibe un mensaje de un cliente.
+								En el caso de que llegue una figura, la guarda en la lista de figuras.</br>
+							</li>
+						</ul>
+						<pre class="fragment">
+							<code class="hljs" data-trim>
+								function incoming (message) {
+									console.log('Message received: %s', message);
+									if (isJson(message)) {
+										//Contains the data of the created figure
+										var obj = JSON.parse(message);
+										//Add figure to list
+										figureList.push(obj);
+								
+										wss.broadcast = broadcast(createObjectToSend(false), false, this);
+									}
+									//Plain message, not object. In this case, "connection open".
+									else {
+										wss.broadcast = broadcast(createObjectToSend(true), true, this);
+									}
+								}
+							</code>
+						</pre>
+					</section>
+					<section class="smaller">
+						<h2>Desarrollo del servidor</h2>
+						<ul class="fragment" data-fragment-index="2">
+							<li>Si se conectó un nuevo usuario:
+								<ul>
+									<li>Se le envían todas las figuras creadas hasta el momento por el resto de los usuarios.</li>
+									<li>Se le notifica al resto de usuarios de su presencia.</li>
+								</ul>
+							</li>
+							<li>Si llegó una nueva figura:
+								<ul>
+									<li>Se envía dicha figura a todos los usuarios.</li>
+								</ul>
+							</li>
+						</ul>
+						<pre class="fragment" data-fragment-index="1">
+							<code class="hljs" data-trim>
+								function broadcast(data, firstConnection, sentBy) {
+									console.log('Broadcasting data');
+									console.log('Clients: ' +  clients.length);
+									if (firstConnection) {
+										for (var i in clients) {
+											if (clients[i] != sentBy) {
+												clients[i].send(createObjectOnlyUsers())
+											}else {
+												clients[i].send(data);
+											}
+										}
+									}else {
+										for (var i in clients) {
+											clients[i].send(data);
+										}
+									}
+								}
+							</code>
+						</pre>
+					</section>
+					<section class="smaller">
+						<h2>Desarrollo del cliente</h2>
+						<ul>
+							<li><a href="http://fabricjs.com/">Fabric.js</a>: Javascript Canvas Library.</li>
+							<li><b>Index.html</b>: fichero que representa la vista del cliente.
+								<ul>
+									<li><b>Botones</b>: crear/seleccionar figuras, dibujo libre.</li>
+									<li><b>Canvas</b>: zona donde se dibujan las figuras y los trazos creados por los usuarios.</li>
+								</ul>
+							</li>
+						</ul>
+						<img id="indexClient" src="images/indexClient.JPG" alt="Vista del cliente"/>
+					</section>
+					<section class="smaller">
+						<h2>Desarrollo del cliente</h2>
+						<ul>
+							<li><b>Script.js</b>: fichero donde se encuentra la implementación del cliente (funciones para crear figuras y enviarlas al servidor, etc.).</li>
+							<li>
+								<b>Función "onMessageFromServer"</b>: se ejecuta cuando el cliente recibe un mensaje del servidor.</br>
+								<ul>
+									<li>Actualiza el número de usuarios y/o los objetos del canvas.</li>
+								</ul>
+							</li>
+						</ul>
+						<pre class="fragment">
+							<code class="hljs" data-trim>
+								function onMessageFromServer(message) {
+									if (isJson(message.data)) {
+										var obj = JSON.parse(message.data);
+										//Update canvas
+										for (var i in obj.figures) {
+											var f = obj.figures[i];
+											addObject(f.type, f.data);
+										}
+										//Paint the objects
+										canvas.renderAll();
+										//Update users
+										document.getElementById("users").innerHTML = obj.users;
+									}   
+								}
+							</code>
+						</pre>
+					</section>
+				</section>
+				<section>
+					<h2>Ejecución</h2>
+					<ul>
+						<li><b>Servidor</b>: abrir la consola de Node.js.
+							<ul>
+								<li>Acceder a la ruta del servidor.</li>
+								<li>Ejecutar <b>node server.js</b>.</li>
+							</ul>
+						</li>
+						<li><b>Cliente</b>: abrir el fichero <b>index.html</b> en el navegador Google Chrome.
+							<ul>
+								<li>Abrir tantas pestañas como clientes se deseen.</li>
+							</ul>
+						</li>
+					</ul>
+				</section>
+				<section>
+					<h2>Despliegue</h2>
+					<p>El código de esta aplicación se puede encontrar en el <a href="https://github.com/TaniaAlvarezDiaz/DibujoColaborativoWebSockets">GitHub</a> de la autora.
+						<ul>
+							<li><a href="https://github.com/TaniaAlvarezDiaz/DibujoColaborativoWebSocketsServidor">Servidor.</a></li>
+							<li><a href="https://github.com/TaniaAlvarezDiaz/DibujoColaborativoWebSocketsCliente">Cliente.</a></li>
+							<li>
+								<a href="https://github.com/TaniaAlvarezDiaz/SlidesDibujoColaborativoWebSockets">Documentación.</a>
+								<ul>
+									<li><a href="https://taniaalvarezdiaz.github.io/SlidesDibujoColaborativoWebSockets">Presentación.</a></li>
+								</ul>
+							</li>
+						</ul>
+					</p>
+				</section>
+			</div>
+		</div>
+
+		<!-- SCRIPTS -->
+		<script src="js/reveal.js"></script>
+		<script>
+			// More info about config & dependencies:
+			// - https://github.com/hakimel/reveal.js#configuration
+			// - https://github.com/hakimel/reveal.js#dependencies
+			Reveal.initialize({
+				controls: true, //Display controls in the bottom right corner
+				progress: true, //Display a presentation progress bar
+                slideNumber: true, //Display the page number of the current slide
+				history: true, //Push each slide change to the browser history
+				keyboard: true, //Enable keyboard shortcuts for navigation
+                overview: true, //Enable the slide overview mode
+                center: true, //Vertical centering of slides
+                touch: true, //Enables touch navigation on devices with touch input
+                loop: false, //Loop the presentation
+                rtl: false, //Change the presentation direction to be RTL
+                fragments: true,  //Turns fragments on and off globally
+                embedded: false, //Flags if the presentation is running in an embedded mode, i.e. contained within a limited portion of the screen
+                help: true, //Flags if we should show a help overlay when the questionmark key is pressed
+                showNotes: false, //Flags if speaker notes should be visible to all viewers
+                autoSlide: 0, //Number of milliseconds between automatically proceeding to the next slide, disabled when set to 0, this value can be overwritten by using a data-autoslide attribute on your slides
+                autoSlideStoppable: true, //Stop auto-sliding after user input
+                mouseWheel: true, //Enable slide navigation via mouse wheel
+                hideAddressBar: true, //Hides the address bar on mobile devices
+                previewLinks: false, //Opens links in an iframe preview overlay
+                transition: 'convex', //none/fade/slide/convex/concave/zoom
+                transitionSpeed: 'slow', //default/slow/fast
+                backgroundTransition: 'none', //none/fade/slide/convex/concave/zoom  //Transition style for full page slide backgrounds
+				hash: true,
+				dependencies: [
+					{ src: 'plugin/markdown/marked.js' },
+					{ src: 'plugin/markdown/markdown.js' },
+					{ src: 'plugin/highlight/highlight.js' },
+					{ src: 'plugin/notes/notes.js', async: true }
+				]
+			});
+		</script>
+	</body>
+</html>

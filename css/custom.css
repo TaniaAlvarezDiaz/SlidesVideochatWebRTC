@@ -1,0 +1,42 @@
+section:not(.center) > p {
+    text-align: justify;
+}
+
+li {
+    text-align: justify;
+}
+
+#serverCreation {
+    width: 90%;
+    height: 400px
+}
+
+.reveal pre {
+    margin: auto;
+    box-shadow: none;
+}
+
+.reveal pre code {
+    max-height: 300px;
+}
+
+.smaller > p{
+    font-size: smaller;
+}
+
+.smaller > ul > li {
+    font-size: smaller;
+}
+
+.smaller > ul > li > ul > li {
+    font-size: smaller;
+}
+
+#indexClient {
+    width: auto;
+    height: 200px
+}
+
+.reveal ul {
+    display: block;
+}

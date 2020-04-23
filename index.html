@@ -9,7 +9,7 @@
 
 		<link rel="stylesheet" href="css/reset.css">
 		<link rel="stylesheet" href="css/reveal.css">
-		<link rel="stylesheet" href="css/theme/solarized.css">
+		<link rel="stylesheet" href="css/theme/beige.css">
 
 		<!-- Theme used for syntax highlighting of code -->
 		<link rel="stylesheet" href="lib/css/monokai.css">
@@ -30,7 +30,7 @@
 		<div class="reveal">
 			<div class="slides">
 				<section class="center">
-					<h1>Dibujo colaborativo con WebSockets</h1>
+					<h1>Videochat con WebRTC</h1>
 					<p>Tania Álvarez Díaz</p>
 					<p><a><href="mailto:uo244856@uniovi.es">UO244856@uniovi.es</a></p>
 					<p><small>Difusión de contenidos multimedia vía web</small></p>
@@ -52,11 +52,11 @@
 				<section>
 					<h2>Introducción</h2>
 					<p>
-						El proyecto consiste en una aplicación de dibujo colaborativo con WebSockets.</br>
+						El proyecto consiste en el desarrollo de una aplicación de videochat utilizando <a href="https://webrtc.org/">WebRTC</a>.</br>
 						Esta aplicación consta de:
 						<ul>
-							<li><b>Servidor</b>: encargado de gestionar las conexiones de los distintos usuarios y los dibujos que estos van añadiendo al canvas.</li>
-							<li><b>Cliente</b>: permite a los usuarios conectarse al servidor, recibir los contenidos que hay dibujados hasta ese momento en el canvas y colaborar en el dibujo.</li>
+							<li><b>Servidor</b>: encargado de gestionar las conexiones de los usuarios.
+							<li><b>Cliente</b>: permite a los usuarios conectarse al servidor y realizar el intercambio de vídeo y mensajes de chat con el resto de usuarios conectados al servidor (usando el nombre de dicho usuario).</li>
 						</ul>
 					</p>
 				</section>
@@ -65,6 +65,7 @@
 						<h2>Desarrollo</h2>
 						<ul>
 							<li><a href="https://code.visualstudio.com/">Visual Studio Code</a>: para desarrollar el cliente y el servidor.</li>
+							<li><a href="https://www.apachefriends.org/es/index.html">XAMPP</a>: para desplegar los clientes.</li>
 							<li><a href="https://nodejs.org/es/">Node.js</a>: para instalar y ejecutar el servidor.</li>
 						</ul>
 						<img id="serverCreation" src="images/serverCreation.JPG" alt="Creación del servidor"/>
@@ -187,23 +188,27 @@
 								<li>Ejecutar <b>node server.js</b>.</li>
 							</ul>
 						</li>
-						<li><b>Cliente</b>: abrir el fichero <b>index.html</b> en el navegador Google Chrome.
+						<li><b>Cliente</b>: introducir el cliente en la carpeta <b>htdocs</b> de XAMPP.
 							<ul>
-								<li>Abrir tantas pestañas como clientes se deseen.</li>
+								<li>Ejecutar el servicio <b>Apache</b> de XAMPP.</li>
+								<li>
+									Abrir el navegador Chrome y ejecutar <b>localhost/NOMBRE_CLIENTE</b> 
+									donde NOMBRE_CLIENTE es el nombre de la carpeta donde se encuentran los archivos del cliente.
+								</li>
 							</ul>
 						</li>
 					</ul>
 				</section>
 				<section>
 					<h2>Despliegue</h2>
-					<p>El código de esta aplicación se puede encontrar en el <a href="https://github.com/TaniaAlvarezDiaz/DibujoColaborativoWebSockets">GitHub</a> de la autora.
+					<p>El código de esta aplicación se puede encontrar en el <a href="https://github.com/TaniaAlvarezDiaz/VideochatWebRTC">GitHub</a> de la autora.
 						<ul>
-							<li><a href="https://github.com/TaniaAlvarezDiaz/DibujoColaborativoWebSocketsServidor">Servidor.</a></li>
-							<li><a href="https://github.com/TaniaAlvarezDiaz/DibujoColaborativoWebSocketsCliente">Cliente.</a></li>
+							<li><a href="https://github.com/TaniaAlvarezDiaz/VideochatWebRTCServidor">Servidor.</a></li>
+							<li><a href="https://github.com/TaniaAlvarezDiaz/VideochatWebRTCCliente">Cliente.</a></li>
 							<li>
-								<a href="https://github.com/TaniaAlvarezDiaz/SlidesDibujoColaborativoWebSockets">Documentación.</a>
+								<a href="https://github.com/TaniaAlvarezDiaz/SlidesVideochatWebRTC">Documentación.</a>
 								<ul>
-									<li><a href="https://taniaalvarezdiaz.github.io/SlidesDibujoColaborativoWebSockets">Presentación.</a></li>
+									<li><a href="https://taniaalvarezdiaz.github.io/SlidesVideochatWebRTC">Presentación.</a></li>
 								</ul>
 							</li>
 						</ul>
@@ -238,7 +243,7 @@
                 mouseWheel: true, //Enable slide navigation via mouse wheel
                 hideAddressBar: true, //Hides the address bar on mobile devices
                 previewLinks: false, //Opens links in an iframe preview overlay
-                transition: 'convex', //none/fade/slide/convex/concave/zoom
+                transition: 'concave', //none/fade/slide/convex/concave/zoom
                 transitionSpeed: 'slow', //default/slow/fast
                 backgroundTransition: 'none', //none/fade/slide/convex/concave/zoom  //Transition style for full page slide backgrounds
 				hash: true,
@@ -246,7 +251,8 @@
 					{ src: 'plugin/markdown/marked.js' },
 					{ src: 'plugin/markdown/markdown.js' },
 					{ src: 'plugin/highlight/highlight.js' },
-					{ src: 'plugin/notes/notes.js', async: true }
+					{ src: 'plugin/notes/notes.js', async: true },
+					{ src: 'plugin/zoom-js/zoom.js', async: true }
 				]
 			});
 		</script>

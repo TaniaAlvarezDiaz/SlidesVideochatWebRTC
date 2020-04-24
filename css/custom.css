@@ -32,6 +32,18 @@ li {
     font-size: smaller;
 }
 
+.x-large > p{
+    font-size: x-large;
+}
+
+.x-large > ul > li {
+    font-size: x-large;
+}
+
+.x-large > ul > li > ul > li {
+    font-size: x-large;
+}
+
 #indexClient {
     width: auto;
     height: 200px
@@ -39,4 +51,12 @@ li {
 
 .reveal ul {
     display: block;
+}
+
+.reveal section img {
+    margin-bottom: 0px;
+}
+
+figcaption {
+    font-size: small;
 }

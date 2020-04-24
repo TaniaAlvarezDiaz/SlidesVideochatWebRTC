@@ -61,119 +61,212 @@
 					</p>
 				</section>
 				<section>
-					<section class="smaller">
+					<section class="x-large">
 						<h2>Desarrollo</h2>
 						<ul>
 							<li><a href="https://code.visualstudio.com/">Visual Studio Code</a>: para desarrollar el cliente y el servidor.</li>
 							<li><a href="https://www.apachefriends.org/es/index.html">XAMPP</a>: para desplegar los clientes.</li>
 							<li><a href="https://nodejs.org/es/">Node.js</a>: para instalar y ejecutar el servidor.</li>
 						</ul>
-						<img id="serverCreation" src="images/serverCreation.JPG" alt="Creación del servidor"/>
+						<figure class="fragment">
+							<img id="serverCreation" src="images/serverCreation.JPG" alt="Creación del servidor"/>
+							<figcaption>Instalación del servidor</figcaption>
+						</figure>
 					</section>
 					<section class="smaller">
 						<h2>Desarrollo del servidor</h2>
 						<ul>
 							<li><b>Server.js</b>: fichero donde se encuentra la implementación del servidor.</li>
-							<li><b>Función "incoming"</b>: se ejecuta cuando el servidor recibe un mensaje de un cliente.
-								En el caso de que llegue una figura, la guarda en la lista de figuras.</br>
+							<li>Uso de <b><a href="https://expressjs.com/">Express</a></b>: framework web para Node.js.</li>
+							<li>Uso de <b>WebSockets</b>: tecnología que proporciona un canal de comunicación bidireccional entre cliente y servidor.
+								<ul class="fragment">
+									<li><b>Evento "connection"</b>: se produce cuando se establece la conexión entre cliente y servidor.</br></li>
+									<li>
+										<b>Evento "message"</b>: se produce cuando el servidor recibe un mensaje del cliente a través de la conexión establecida.</b>
+										<ul><li>En función del tipo de mensaje se producen distintas acciones (siguiente transparencia).</li></ul>
+									</li>
+								</ul>
 							</li>
+						</ul>
+					</section>
+					<section class="x-large">
+						<h2>Desarrollo del servidor</h2>
+						<ul>
+							<li><b>Login</b>: los clientes se registran en el servidor (username único).</li>
+							<li><b>Offer</b>: oferta de conexión que desea hacer un cliente a otro (ambos registrados en el sistema).</li>
+							<li><b>Answer</b>: respuesta de un cliente a la oferta de conexión.</li>
+							<li><b>Candidate</b>: candidato que se envía si la oferta de conexión a sido aceptada.</li>
+							<li><b>Leave</b>: uno de los clientes abandona la conexión.</li>
 						</ul>
 						<pre class="fragment">
 							<code class="hljs" data-trim>
-								function incoming (message) {
-									console.log('Message received: %s', message);
-									if (isJson(message)) {
-										//Contains the data of the created figure
-										var obj = JSON.parse(message);
-										//Add figure to list
-										figureList.push(obj);
+								connection.on('message', function (message) {
+									var data;
 								
-										wss.broadcast = broadcast(createObjectToSend(false), false, this);
+									try {
+									  data = JSON.parse(message);
+									} catch (e) {
+									  console.log("Error parsing JSON");
+									  data = {};
 									}
-									//Plain message, not object. In this case, "connection open".
-									else {
-										wss.broadcast = broadcast(createObjectToSend(true), true, this);
-									}
-								}
-							</code>
-						</pre>
-					</section>
-					<section class="smaller">
-						<h2>Desarrollo del servidor</h2>
-						<ul class="fragment" data-fragment-index="2">
-							<li>Si se conectó un nuevo usuario:
-								<ul>
-									<li>Se le envían todas las figuras creadas hasta el momento por el resto de los usuarios.</li>
-									<li>Se le notifica al resto de usuarios de su presencia.</li>
-								</ul>
-							</li>
-							<li>Si llegó una nueva figura:
-								<ul>
-									<li>Se envía dicha figura a todos los usuarios.</li>
-								</ul>
-							</li>
-						</ul>
-						<pre class="fragment" data-fragment-index="1">
-							<code class="hljs" data-trim>
-								function broadcast(data, firstConnection, sentBy) {
-									console.log('Broadcasting data');
-									console.log('Clients: ' +  clients.length);
-									if (firstConnection) {
-										for (var i in clients) {
-											if (clients[i] != sentBy) {
-												clients[i].send(createObjectOnlyUsers())
-											}else {
-												clients[i].send(data);
-											}
+								
+									switch (data.type) 
+									{
+									  case "login":
+										console.log("User logged in as", data.source);
+										if (users[data.source]) 
+										{ 
+										  //username already exists, login not possible
+										  sendTo(connection, {
+											type: "login",
+											success: false
+										  });
+								
+										} else {
+										  users[data.source] = connection;
+										  connection.source = data.source;
+										  sendTo(connection, {
+											type: "login",
+											success: true
+										  });
 										}
-									}else {
-										for (var i in clients) {
-											clients[i].send(data);
+
+										break;
+									  case "offer":
+										console.log("Sending offer to", data.target);
+										var conn = users[data.target];
+								
+										if (conn != null) {
+										  connection.target = data.target;
+										  //send offer to conn
+										  sendTo(conn, {
+											type: "offer",
+											offer: data.offer, 
+											source: connection.source
+										  });
 										}
+
+										break;
+									  case "answer":
+										console.log("Sending answer to", data.target);
+										var conn = users[data.target];
+								
+										if (conn != null) {
+										  connection.target = data.target;
+										  //send answer to conn
+										  sendTo(conn, {
+											type: "answer",
+											answer: data.answer
+										  });
+										}
+								
+										break;
+									  case "candidate":
+										console.log("Sending candidate to", data.target);
+										var conn = users[data.target];
+								
+										if (conn != null) {
+										  sendTo(conn, {
+											type: "candidate",
+											candidate: data.candidate
+										  });
+										}
+								
+										break;
+									  case "leave":
+										console.log("Disconnecting user from", data.target);
+										var conn = users[data.target];
+									  
+										if (conn != null) {
+										  conn.target = null;
+										  sendTo(conn, {
+											type: "leave"
+										  });
+										}
+								
+										break;
+									  default:
+										sendTo(connection, {
+										  type: "error",
+										  message: "Unrecognized command: " + data.type
+										});
+								
+										break;
 									}
-								}
+								  });
 							</code>
 						</pre>
 					</section>
 					<section class="smaller">
 						<h2>Desarrollo del cliente</h2>
 						<ul>
-							<li><a href="http://fabricjs.com/">Fabric.js</a>: Javascript Canvas Library.</li>
 							<li><b>Index.html</b>: fichero que representa la vista del cliente.
 								<ul>
-									<li><b>Botones</b>: crear/seleccionar figuras, dibujo libre.</li>
-									<li><b>Canvas</b>: zona donde se dibujan las figuras y los trazos creados por los usuarios.</li>
+									<li><b>Botones</b>: start (registrarse en el servidor), llamar, colgar.</li>
+									<li><b>Videos</b>: se muestran los videos de la videollamada (en grande el usuario local y en pequeño el remoto).</li>
+									<li><b>Conversación</b>: campo para escribir el mensaje a enviar y vista donde se muestra el chat completo.</li>
 								</ul>
 							</li>
 						</ul>
-						<img id="indexClient" src="images/indexClient.JPG" alt="Vista del cliente"/>
+						<div class="fragment">
+							<img id="indexClient1" src="images/indexClient1.JPG" alt="Vista del cliente (botones)"/>
+						<img id="indexClient2" src="images/indexClient2.JPG" alt="Vista del cliente (videos y conversación)"/>
+						</div>
 					</section>
-					<section class="smaller">
+					<section class="x-large">
 						<h2>Desarrollo del cliente</h2>
 						<ul>
-							<li><b>Script.js</b>: fichero donde se encuentra la implementación del cliente (funciones para crear figuras y enviarlas al servidor, etc.).</li>
 							<li>
-								<b>Función "onMessageFromServer"</b>: se ejecuta cuando el cliente recibe un mensaje del servidor.</br>
+								<b>Script.js</b>: fichero donde se encuentra la implementación del cliente (funciones para realizar peticiones al servidor,
+								 intercambiar mensajes con otros usuarios, etc.).
+							</li>
+							<li>
+								<b>Función "startingCallCommunication"</b>: se ejecuta cuando el usuario pulsa el botón de llamar.</br>
 								<ul>
-									<li>Actualiza el número de usuarios y/o los objetos del canvas.</li>
+									<li>Establece una conexión (comunicación) entre dos usuarios (local y remoto).</li>
+									<li>Crea un canal de datos para que los usuarios se puedan enviar mensajes.</li>
 								</ul>
 							</li>
 						</ul>
 						<pre class="fragment">
 							<code class="hljs" data-trim>
-								function onMessageFromServer(message) {
-									if (isJson(message.data)) {
-										var obj = JSON.parse(message.data);
-										//Update canvas
-										for (var i in obj.figures) {
-											var f = obj.figures[i];
-											addObject(f.type, f.data);
-										}
-										//Paint the objects
-										canvas.renderAll();
-										//Update users
-										document.getElementById("users").innerHTML = obj.users;
-									}   
+								function call() {
+									//Get username from input
+									remoteUsername = document.getElementById("remoteUsername").value;
+									console.log("Starting call");
+									//Establish connection
+									startingCallCommunication();
+									//We're all set! Create an offer to be 'sent to the callee as soon as the local SDP is ready
+									localPeerConnection.createOffer(gotLocalDescription, onSignalingError);
+								}
+
+								function startingCallCommunication() {
+									hangupButton.disabled = false;
+									//Communication between browsers
+									if (typeof RTCPeerConnection == "undefined")
+										RTCPeerConnection = webkitRTCPeerConnection;
+									console.log("RTCPeerConnection object: " + RTCPeerConnection);
+								
+									//This is an optional configuration string , associated with NAT traversal setup
+									var configuration = {
+										//Servers on https://gist.github.com/yetithefoot/7592580
+										"iceServers": [{"url": "stun:stun.ekiga.net"}]
+									}
+									localPeerConnection = new RTCPeerConnection(configuration);
+									console.log("Created local peer connection object");
+								
+									//Add the local stream  to the local PeerConnection
+									localPeerConnection.addStream(theStream);
+									console.log("Added localStream to localPeerConnection");
+								
+									//Add a handler associated with ICE protocol events
+									localPeerConnection.onicecandidate = gotLocalIceCandidate;
+									//...and a second handler to be activated as soon as the remote stream becomes available
+									localPeerConnection.onaddstream = gotRemoteStream;
+								
+									//Configure dataChannel
+									dataChannel = localPeerConnection.createDataChannel("myChannel", {});
+									localPeerConnection.ondatachannel = handleDataChannel;     
 								}
 							</code>
 						</pre>

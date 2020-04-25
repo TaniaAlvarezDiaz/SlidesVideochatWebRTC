@@ -1,8 +1,8 @@
 <!doctype html>
-<html>
+<html lang="es">
 	<head>
 		<meta charset="utf-8">
-		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
 		<meta name="author" content="Tania Álvarez Díaz">
 
 		<title>Dibujo colaborativo con WebSockets</title>
@@ -32,7 +32,7 @@
 				<section class="center">
 					<h1>Videochat con WebRTC</h1>
 					<p>Tania Álvarez Díaz</p>
-					<p><a><href="mailto:uo244856@uniovi.es">UO244856@uniovi.es</a></p>
+					<p><a href="mailto:uo244856@uniovi.es">UO244856@uniovi.es</a></p>
 					<p><small>Difusión de contenidos multimedia vía web</small></p>
 				</section>
 				<section>
@@ -52,15 +52,16 @@
 				<section>
 					<h2>Introducción</h2>
 					<p>
-						El proyecto consiste en el desarrollo de una aplicación de videochat utilizando <a href="https://webrtc.org/">WebRTC</a>.</br>
+						El proyecto consiste en el desarrollo de una aplicación de videochat utilizando <a href="https://webrtc.org/">WebRTC</a>.<br/>
 						Esta aplicación consta de:
-						<ul>
-							<li><b>Servidor</b>: encargado de gestionar las conexiones de los usuarios.
-							<li><b>Cliente</b>: permite a los usuarios conectarse al servidor y realizar el intercambio de vídeo y mensajes de chat con el resto de usuarios conectados al servidor (usando el nombre de dicho usuario).</li>
-						</ul>
 					</p>
+					<ul>
+						<li><b>Servidor</b>: encargado de gestionar las conexiones de los usuarios.
+						<li><b>Cliente</b>: permite a los usuarios conectarse al servidor y realizar el intercambio de vídeo y mensajes de chat con el resto de usuarios conectados al servidor (usando el nombre de dicho usuario).</li>
+					</ul>
 				</section>
 				<section>
+					<h2 hidden>Desarrollo</h2>
 					<section class="x-large">
 						<h2>Desarrollo</h2>
 						<ul>
@@ -80,9 +81,9 @@
 							<li>Uso de <b><a href="https://expressjs.com/">Express</a></b>: framework web para Node.js.</li>
 							<li>Uso de <b>WebSockets</b>: tecnología que proporciona un canal de comunicación bidireccional entre cliente y servidor.
 								<ul class="fragment">
-									<li><b>Evento "connection"</b>: se produce cuando se establece la conexión entre cliente y servidor.</br></li>
+									<li><b>Evento "connection"</b>: se produce cuando se establece la conexión entre cliente y servidor.<br/></li>
 									<li>
-										<b>Evento "message"</b>: se produce cuando el servidor recibe un mensaje del cliente a través de la conexión establecida.</b>
+										<b>Evento "message"</b>: se produce cuando el servidor recibe un mensaje del cliente a través de la conexión establecida.
 										<ul><li>En función del tipo de mensaje se producen distintas acciones (siguiente transparencia).</li></ul>
 									</li>
 								</ul>
@@ -210,7 +211,7 @@
 						</ul>
 						<div class="fragment">
 							<img id="indexClient1" src="images/indexClient1.JPG" alt="Vista del cliente (botones)"/>
-						<img id="indexClient2" src="images/indexClient2.JPG" alt="Vista del cliente (videos y conversación)"/>
+							<img id="indexClient2" src="images/indexClient2.JPG" alt="Vista del cliente (videos y conversación)"/>
 						</div>
 					</section>
 					<section class="x-large">
@@ -221,7 +222,7 @@
 								 intercambiar mensajes con otros usuarios, etc.).
 							</li>
 							<li>
-								<b>Función "startingCallCommunication"</b>: se ejecuta cuando el usuario pulsa el botón de llamar.</br>
+								<b>Función "startingCallCommunication"</b>: se ejecuta cuando el usuario pulsa el botón de llamar.<br/>
 								<ul>
 									<li>Establece una conexión (comunicación) entre dos usuarios (local y remoto).</li>
 									<li>Crea un canal de datos para que los usuarios se puedan enviar mensajes.</li>
@@ -294,18 +295,17 @@
 				</section>
 				<section>
 					<h2>Despliegue</h2>
-					<p>El código de esta aplicación se puede encontrar en el <a href="https://github.com/TaniaAlvarezDiaz/VideochatWebRTC">GitHub</a> de la autora.
-						<ul>
-							<li><a href="https://github.com/TaniaAlvarezDiaz/VideochatWebRTCServidor">Servidor.</a></li>
-							<li><a href="https://github.com/TaniaAlvarezDiaz/VideochatWebRTCCliente">Cliente.</a></li>
-							<li>
-								<a href="https://github.com/TaniaAlvarezDiaz/SlidesVideochatWebRTC">Documentación.</a>
-								<ul>
-									<li><a href="https://taniaalvarezdiaz.github.io/SlidesVideochatWebRTC">Presentación.</a></li>
-								</ul>
-							</li>
-						</ul>
-					</p>
+					<p>El código de esta aplicación se puede encontrar en el <a href="https://github.com/TaniaAlvarezDiaz/VideochatWebRTC">GitHub</a> de la autora.</p>
+					<ul>
+						<li><a href="https://github.com/TaniaAlvarezDiaz/VideochatWebRTCServidor">Servidor.</a></li>
+						<li><a href="https://github.com/TaniaAlvarezDiaz/VideochatWebRTCCliente">Cliente.</a></li>
+						<li>
+							<a href="https://github.com/TaniaAlvarezDiaz/SlidesVideochatWebRTC">Documentación.</a>
+							<ul>
+								<li><a href="https://taniaalvarezdiaz.github.io/SlidesVideochatWebRTC">Presentación.</a></li>
+							</ul>
+						</li>
+					</ul>
 				</section>
 			</div>
 		</div>
